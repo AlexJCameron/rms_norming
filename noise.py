@@ -26,7 +26,7 @@ def inrad(x0, y0, r):
                 points.append((y,x))
     return points
 
-def false_sources(field_band_dict):
+def false_sources(field_band_dict, no_sources=100):
     """Generates .fits file containing false sources in empty regions of the image.
 
     This enables analysis of the background noise level of an image if SExtractor is used to detect in this false image, but then do photometry in the original science image.
@@ -64,7 +64,7 @@ def false_sources(field_band_dict):
     y_seg = []
 
     # Pick our random points
-    Npoints = 100
+    Npoints = no_sources
     break_point = 0
     while len(x_seg) < Npoints:
         new_x = np.random.randint(0,xmax)
@@ -205,6 +205,33 @@ def false_SExtract(field_band_dict):
     # Run SExtractor
     check_call(['sextractor', dual_sci, '-c', 'crude.sex', '-WEIGHT_IMAGE', dual_rms, '-CHECKIMAGE_NAME', segmap_false, '-CATALOG_NAME', cat_fname, '-GAIN', gain, '-MAG_ZEROPOINT', magzeropoint])
 
+def test_SExtract(field_band_dict):
+    """Runs SExtractor in dual mode, detecting on a false sources image and performing photometry with the science image.
+
+    Parameters
+    ----------
+    field_band_dict : dict
+        Dict of the various filenames etc relevant to the field and band being SExtracted
+
+    Returns
+    -------
+    SExtractor outputs
+
+    """
+    false_image = field_band_dict['false_img']
+    sci_image = field_band_dict['sci']
+    rms_map = field_band_dict['rms_norm']
+    cat_fname = 'test.cat'
+    gain = str(field_band_dict['gain'])
+    magzeropoint = str(field_band_dict['magz'])
+
+    # Running it in dual mode
+    dual_sci = false_image + ',' + sci_image
+    dual_rms = rms_map + ',' + rms_map
+
+    # Run SExtractor
+    check_call(['sextractor', dual_sci, '-c', 'crude.sex', '-WEIGHT_IMAGE', dual_rms, '-CHECKIMAGE_TYPE', 'NONE', '-CATALOG_NAME', cat_fname, '-GAIN', gain, '-MAG_ZEROPOINT', magzeropoint])
+
 def rms_norm_constant(cat_fname):
     """Calculates the RMS normalisation constant of an image based off the .cat of background photometry.
 
@@ -220,6 +247,7 @@ def rms_norm_constant(cat_fname):
 
     """
     cat_data = get_catalog(cat_fname)
+    src_count = len(cat_data.columns)
 
     for ind in range(len(cat_data.index)):
         if cat_data.index[ind] == 'FLUX_APER':
@@ -235,4 +263,4 @@ def rms_norm_constant(cat_fname):
     ferr_median = np.median(fluxerr_aper)
     norm_constant = f_stdev / ferr_median
 
-    return norm_constant
+    return norm_constant, src_count

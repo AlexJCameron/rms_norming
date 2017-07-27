@@ -111,6 +111,7 @@ def full_filename_list(field_data):
             band_dict['seg_false'] = fake_dir + field + '_' + band + '_seg_false.fits'
             band_dict['false_img'] = fake_dir + field + '_' + band + '_false_sources.fits'
 
+            band_dict['no_false_srcs'] = 100
             band_dict['magz'] = magzeros[band]
 
             hdu_list = fits.open(band_dict['sci'])
