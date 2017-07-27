@@ -2,6 +2,7 @@ import rms_tools as rms
 import list_tools as lists
 import noise
 from os.path import isfile
+from os import remove
 
 sci_data_dir = 'test_field_data/'
 master_bands = ['f606w', 'f600lp', 'f098m', 'f125w', 'f160w']
@@ -28,4 +29,12 @@ for field in field_data:
             print "False sources image for field %s band %s already exists!" % (field, band)
 
         print "SExtracting false sources...\n"
-        noise.false_SExtract(field_data[field][band])
+        # noise.false_SExtract(field_data[field][band])
+
+        print "Calculating normalisation constant..."
+        norm_constant = noise.rms_norm_constant(field_data[field][band]['cat_false'])
+
+        print "Creating normalised RMS map..."
+        if isfile(field_data[field][band]['rms_norm']):
+            remove(field_data[field][band]['rms_norm'])
+        rms.norm_rms_map(field_data[field][band]['rms_crude'], field_data[field][band]['rms_norm'], norm_constant)

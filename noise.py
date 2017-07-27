@@ -5,6 +5,8 @@
 import numpy as np
 from astropy.io import fits
 from subprocess import check_call
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def gest(r):
     """A simple Gaussian estimate to model the light profile of the false sources we'll create
@@ -98,6 +100,83 @@ def false_sources(field_band_dict):
     print "%d false sources generated" % len(x_seg)
     fits.writeto(field_band_dict['false_img'], falsedata)
 
+def rm_empty(q_list):
+    """Removes empty entries from a list.
+
+    Parameters
+    ----------
+    q_list : list
+        The list to be cleaned.
+
+    """
+    new_list = []
+    for item in q_list:
+        if not len(item) == 0:
+            new_list.append(item)
+    return new_list
+
+def get_sex_cat_parameters(cat_fname):
+    """Gets a list of output parameters in a SExtractor .cat file
+    """
+    cat_file = open(cat_fname)
+    cat_raw = cat_file.read().split('\n')[:-1]
+    cat_file.close()
+    header = []
+    for cat_line in cat_raw:
+        if cat_line[0] == '#':
+            head_line = rm_empty(cat_line.split(' '))
+            next_len = int(head_line[1])
+            if len(header) == next_len - 1:
+                header.append(head_line[2])
+            else:
+                reps = next_len - len(header) - 1
+                for n in range(reps):
+                    header.append('``')
+                header.append(head_line[2])
+    return header
+
+def get_catalog(fname):
+    """Takes SExtractor catalog and a list of objects and returns data on those objects in the form of a list of lists.
+
+    Parameters
+    ----------
+    fname : str
+        The filename of the SExtractor catalog.
+    obj_nos : list
+        A list of int corresponding to the ID of objects in the desired output catalog.
+
+    Returns
+    -------
+    object_data : list of lists
+        A list in which each element is a list of the data of an object in the catalog.
+
+    """
+    header = get_sex_cat_parameters(fname)[1:]
+    cat_data = open(fname)
+    cat_data_raw = rm_empty(cat_data.read().split('\n'))
+    cat_data.close()
+    object_data = {}
+
+    for raw_line in cat_data_raw:
+        split_line = raw_line.split(' ')
+        data_line = []
+
+        # Check it's not header
+        if not split_line[0] == '#':
+
+            # Iterate through split_line...
+            for item in split_line:
+                # ... and append them if their len > 0
+                if not len(item) == 0:
+                    data_line.append(float(item))
+
+            # Add the new data line to the output
+            object_data[int(data_line[0])] = data_line[1:]
+
+    final_data = pd.DataFrame(object_data, index=header)
+
+    return final_data
+
 def false_SExtract(field_band_dict):
     """Runs SExtractor in dual mode, detecting on a false sources image and performing photometry with the science image.
 
@@ -125,3 +204,35 @@ def false_SExtract(field_band_dict):
 
     # Run SExtractor
     check_call(['sextractor', dual_sci, '-c', 'crude.sex', '-WEIGHT_IMAGE', dual_rms, '-CHECKIMAGE_NAME', segmap_false, '-CATALOG_NAME', cat_fname, '-GAIN', gain, '-MAG_ZEROPOINT', magzeropoint])
+
+def rms_norm_constant(cat_fname):
+    """Calculates the RMS normalisation constant of an image based off the .cat of background photometry.
+
+    Parameters
+    ----------
+    cat_fname : str
+        Filename of the .cat SExtracted from the false source photometry
+
+    Returns
+    -------
+    norm_const : float
+        The normalisation constant to be applied to the RMS map
+
+    """
+    cat_data = get_catalog(cat_fname)
+
+    for ind in range(len(cat_data.index)):
+        if cat_data.index[ind] == 'FLUX_APER':
+            aper8_ind = ind + 3
+        if cat_data.index[ind] == 'FLUXERR_APER':
+            erraper8_ind = ind + 3
+
+    flux_aper = cat_data.iloc[aper8_ind]
+    fluxerr_aper = cat_data.iloc[erraper8_ind]
+
+    # Calculations
+    f_stdev = np.std(flux_aper)
+    ferr_median = np.median(fluxerr_aper)
+    norm_constant = f_stdev / ferr_median
+
+    return norm_constant

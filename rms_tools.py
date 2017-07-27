@@ -60,3 +60,29 @@ def crude_SExtract(field_band_dict):
 
     # Run SExtractor
     check_call(['sextractor', dual_sci, '-c', 'crude.sex', '-WEIGHT_IMAGE', dual_rms, '-CHECKIMAGE_NAME', segm_chk_fname, '-CATALOG_NAME', cat_fname, '-GAIN', gain, '-MAG_ZEROPOINT', magzeropoint])
+
+def norm_rms_map(crude_rms_map, norm_rms_fname, norm_const):
+    """Normalises a 'crude' RMS map according to a normalisation constant.
+
+    Parameters
+    ----------
+    crude_rms_map, norm_rms_fname : str
+        Filenames of the input RMS map to be normalised, and the ouput normalised RMS map respectively
+    norm_const : float
+        The normalisation constant to be applied
+
+    Returns
+    -------
+    Normalised RMS map
+
+    """
+    hdu_list = fits.open(crude_rms_map)
+    rms_data = hdu_list[0].data
+    hdu_list[0].header['filename'] = norm_rms_fname
+
+    for x in np.nditer(rms_data, op_flags = ['readwrite']):
+        x[...] = x * norm_const
+
+    # Writes the output to file
+    hdu_list.writeto(norm_rms_fname)
+    hdu_list.close()
