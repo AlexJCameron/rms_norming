@@ -95,7 +95,10 @@ def false_sources(field_band_dict, no_sources=100):
     for n in range(len(x_seg)):
         f_pixs = inrad(x_seg[n]-1,y_seg[n]-1, 12)
         for pixel in f_pixs:
-            falsedata[pixel] = 30 * gest(np.sqrt((x_seg[n]-1-pixel[1])**2+(y_seg[n]-1-pixel[0])**2))
+            try:
+                falsedata[pixel] = 30 * gest(np.sqrt((x_seg[n]-1-pixel[1])**2+(y_seg[n]-1-pixel[0])**2))
+            except IndexError:
+                pass
 
     print "%d false sources generated" % len(x_seg)
     fits.writeto(field_band_dict['false_img'], falsedata)
