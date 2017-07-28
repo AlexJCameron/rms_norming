@@ -6,6 +6,7 @@ numpy, pandas, astropy
 SourceExtractor
 
 Description:
+(Proper documentation is yet to be written)
 Accurate analysis of astronomical data in FITS images generally requires properly normalised weight maps.
 rms_norming requires an installation of SourceExtractor. It will use SExtractor to perform photometry on the background
 of the science image to get a measure for the nosie of the image. It will then create a new normalised RMS weight map 
