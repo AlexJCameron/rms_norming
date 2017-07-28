@@ -1,23 +1,24 @@
 import rms_tools as rms
-import list_tools as lists
+import rms_config as config
 import noise
 from os.path import isfile
 from os import remove
 
-sci_data_dir = 'test_field_data/'
-master_bands = ['f606w', 'f600lp', 'f098m', 'f125w', 'f160w']
-fields = ['0808+3946']
+sci_data_dir = config.config_dict['sci_dir']
+master_bands = config.config_dict['master_bands']
+fields = config.read_list(config.config_dict['fields'])
 
 flagged_imgs = []
 
-field_data = lists.field_band_list(fields, sci_data_dir, master_bands=master_bands)
-field_data = lists.full_filename_list(field_data)
+field_data = config.field_band_list(fields, sci_data_dir, master_bands=master_bands)
+field_data = config.full_filename_list(field_data)
 
 for field in field_data:
     for band in field_data[field]['bands']:
         flags = ''
         print "\n\n****************\n****************\nField %s, band %s : \n" % (field, band)
         if not isfile(field_data[field][band]['rms_crude']):
+            print "Making initial RMS map..."
             rms.wht_to_rms(field_data[field][band]['wht'], field_data[field][band]['rms_crude'])
         else:
             print "First pass RMS map for field %s band %s already exists!" % (field, band)
@@ -48,11 +49,15 @@ for field in field_data:
         noise.test_SExtract(field_data[field][band])
         test_norm, test_count = noise.rms_norm_constant('test.cat')
 
+        print "noise_measured / noise_estimated = ", test_norm
+
         if not 0.99 < test_norm < 1.001:
-            flags = flags + ' normacc '
+            flags = flags + ' normacc:' + str(test_norm) + ' '
 
         if not flags == '':
             flagged_imgs.append(field+'_'+band+flags)
 
-print "Flagged images:\n", flagged_imgs
+# Clean up
+if not len(flagged_imgs) == 0:
+    config.write_flags(flagged_imgs)
 remove('test.cat')

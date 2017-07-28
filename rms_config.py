@@ -35,6 +35,37 @@ def read_list(list_fname):
 
     return final_list
 
+def auto_config(config_file='test.config'):
+    """Reads in config file and determines various setup variable from that.
+
+    Parameters
+    ----------
+    config_file : str
+        Filename of the config file
+
+    Returns
+    -------
+    config_dict : dict
+        A dict containing the relevant information extracted from the config file.
+
+    """
+    config_list = []
+    config_dict = {}
+    for line in read_list(config_file):
+        if not line[0] == '#':
+            config_list.append(line)
+
+    for item in config_list:
+        [key, val] = item.split('=')
+        config_dict[key] = val
+
+    bands = config_dict['master_bands'].split(',')
+    config_dict['master_bands'] = bands
+
+    return config_dict
+
+config_dict = auto_config()
+
 def field_band_list(fields, data_dir, master_bands=['f606w', 'f600lp', 'f098m', 'f125w', 'f160w']):
     """Takes a list of fields and science files and identifies which fields are present with which bands.
 
@@ -82,13 +113,13 @@ def full_filename_list(field_data):
         With new entries.
 
     """
-    sci_dir = 'test_field_data/'
-    wht_dir = 'test_field_wht/'
-    rms_crude_dir = 'test_field_rms_crude/'
-    rms_final_dir = 'test_field_rms_norm/'
-    cat_crude_dir = 'test_field_cat_crude/'
-    seg_crude_dir = 'test_field_seg_crude/'
-    fake_dir = 'test_field_false_source_imgs/'
+    sci_dir = config_dict['sci_dir']
+    wht_dir = config_dict['wht_dir']
+    rms_crude_dir = config_dict['rms_crude_dir']
+    rms_final_dir = config_dict['rms_final_dir']
+    cat_crude_dir = config_dict['cat_crude_dir']
+    seg_crude_dir = config_dict['seg_crude_dir']
+    fake_dir = config_dict['fake_dir']
 
     sci_file_list = listdir(sci_dir)
     wht_file_list = listdir(wht_dir)
@@ -122,3 +153,29 @@ def full_filename_list(field_data):
             field_data[field][band] = band_dict
 
     return field_data
+
+def write_flags(flagged_imgs, flag_log_fname=config_dict['flag_log'], verbose=True):
+    """Writes a log of the flagged imaages from the RMS normalisation.
+
+    Parameters
+    ----------
+    flagged_imgs : list
+        A list of the flagged images to be written to file
+    flag_log_fname : str
+        Filename of the output file
+    verbose : bool
+        Set True to print to console output as well
+
+    """
+    log_file = open(flag_log_fname, 'w')
+    log_file.truncate()
+
+    if verbose:
+        print "\nFlagged images:"
+
+    for flag_img in flagged_imgs:
+        if verbose:
+            print flag_img
+        log_file.write(flag_img + '\n')
+
+    log_file.close()
