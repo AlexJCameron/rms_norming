@@ -2,13 +2,15 @@ import numpy as np
 from astropy.io import fits
 from subprocess import check_call
 
-def wht_to_rms(wht_fname, rms_fname):
+def wht_to_rms(wht_fname, rms_fname, zero_handle='inf'):
     """Reads in data from a .fits weight map and makes an RMS map where each pixel is 1/sqrt(x) of the value x in the weight map.
 
     Parameters
     ----------
     wht_fname, rms_fname : str
         Filenames of the input weight map file and the output RMS file. The RMS file must NOT already be a file
+    zero_handle : str 'inf' or '100'
+        What to put in the RMS map for a value of 0 in the wht map
 
     Returns
     -------
@@ -21,8 +23,20 @@ def wht_to_rms(wht_fname, rms_fname):
     # Changes the header of the new fits file to match the filename
     hdu_list[0].header['filename'] = rms_fname
 
-    for x in np.nditer(weight_data, op_flags = ['readwrite']):
-        x[...] = 1/np.sqrt(np.absolute(x))
+    if zero_handle == 'inf':
+        for x in np.nditer(weight_data, op_flags = ['readwrite']):
+            x[...] = 1/np.sqrt(np.absolute(x))
+    else:
+        try:
+            big_num = float(zero_handle)
+            for x in np.nditer(weight_data, op_flags = ['readwrite']):
+                if not x == 0:
+                    x[...] = 1/np.sqrt(np.absolute(x))
+                else:
+                    x[...] = big_num
+        except ValueError:
+            for x in np.nditer(weight_data, op_flags = ['readwrite']):
+                x[...] = 1/np.sqrt(np.absolute(x))
 
     try:
         hdu_list.writeto(rms_fname)

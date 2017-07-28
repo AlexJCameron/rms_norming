@@ -136,7 +136,7 @@ def get_sex_cat_parameters(cat_fname):
     return header
 
 def get_catalog(fname):
-    """Takes SExtractor catalog and a list of objects and returns data on those objects in the form of a list of lists.
+    """Takes SExtractor catalog and a list of objects and returns data on those objects.
 
     Parameters
     ----------
@@ -147,7 +147,7 @@ def get_catalog(fname):
 
     Returns
     -------
-    object_data : list of lists
+    object_data : pandas DataFrame
         A list in which each element is a list of the data of an object in the catalog.
 
     """

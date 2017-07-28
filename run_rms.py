@@ -19,7 +19,7 @@ for field in field_data:
         print "\n\n****************\n****************\nField %s, band %s : \n" % (field, band)
         if not isfile(field_data[field][band]['rms_crude']):
             print "Making initial RMS map..."
-            rms.wht_to_rms(field_data[field][band]['wht'], field_data[field][band]['rms_crude'])
+            rms.wht_to_rms(field_data[field][band]['wht'], field_data[field][band]['rms_crude'], zero_handle=config.config_dict['wht_zero'])
         else:
             print "First pass RMS map for field %s band %s already exists!" % (field, band)
 

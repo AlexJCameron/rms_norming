@@ -1,5 +1,6 @@
-from os import listdir
+from os import listdir, makedirs
 from astropy.io import fits
+from os.path import exists
 
 magzeros = {
 'f606w':25.090,
@@ -58,6 +59,8 @@ def auto_config(config_file='test.config'):
     for item in config_list:
         [key, val] = item.split('=')
         config_dict[key] = val
+        if key[-3:] == 'dir' and not exists(val):
+            makedirs(val)
 
     bands = config_dict['master_bands'].split(',')
     config_dict['master_bands'] = bands
