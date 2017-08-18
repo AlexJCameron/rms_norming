@@ -4,14 +4,21 @@ import noise
 from os.path import isfile
 from os import remove
 
-sci_data_dir = config.config_dict['sci_dir']
+# sci_data_dir = config.config_dict['sci_dir']   #z8
 master_bands = config.config_dict['master_bands']
 fields = config.read_list(config.config_dict['fields'])
 
 flagged_imgs = []
 
-field_data = config.field_band_list(fields, sci_data_dir, master_bands=master_bands)
-field_data = config.full_filename_list(field_data)
+# field_data = config.field_band_list(fields, sci_data_dir, master_bands=master_bands)  # z8
+field_data = {}             # z9
+for field in fields:        # z9
+    this_field = {}
+    this_field['bands'] = master_bands  # z9
+    field_data[field] = this_field      # z9
+
+# field_data = config.full_filename_list_z8(field_data)  # z8
+field_data = config.full_filename_list_z9(field_data)  # z9
 
 for field in field_data:
     for band in field_data[field]['bands']:
@@ -66,4 +73,7 @@ for field in field_data:
 # Clean up
 if not len(flagged_imgs) == 0:
     config.write_flags(flagged_imgs)
-remove('test.cat')
+try:
+    remove('test.cat')
+except OSError:
+    pass
