@@ -3,22 +3,22 @@ from astropy.io import fits
 from os.path import exists
 
 # #### BORG z8 #### #
-# magzeros = {
-# 'f606w':26.090,
-# 'f600lp':25.879,
-# 'f098m':25.6674,
-# 'f125w':26.2303,
-# 'f160w':25.9463
-# }
+magzeros = {
+'f606w':26.090,
+'f600lp':25.879,
+'f098m':25.6674,
+'f125w':26.2303,
+'f160w':25.9463
+}
 
 # #### BORG z9 #### #
-magzeros = {
-'F105':26.2687,
-'F125':26.2303,
-'F140':26.4524,
-'F160':25.9463,
-'F350':26.957
-}
+# magzeros = {
+# 'F105':26.2687,
+# 'F125':26.2303,
+# 'F140':26.4524,
+# 'F160':25.9463,
+# 'F350':26.957
+# }
 
 def read_list(list_fname):
     """Takes a flat file list where each item is on a separate line and returns in list format.
@@ -46,7 +46,7 @@ def read_list(list_fname):
 
     return final_list
 
-def auto_config(config_file='z9.config'):
+def auto_config(config_file='detection.config'):
     """Reads in config file and determines various setup variable from that.
 
     Parameters
@@ -74,6 +74,9 @@ def auto_config(config_file='z9.config'):
 
     bands = config_dict['master_bands'].split(',')
     config_dict['master_bands'] = bands
+
+    bands = config_dict['make_bands'].split(',')
+    config_dict['make_bands'] = bands
 
     return config_dict
 
