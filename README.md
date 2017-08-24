@@ -1,4 +1,4 @@
-rms_norming
+# rms_norming
 
 A tool for creating normalised RMS maps for astronomical FITS images
 
