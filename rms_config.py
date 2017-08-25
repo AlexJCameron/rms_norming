@@ -106,7 +106,7 @@ def field_band_list(fields, data_dir, master_bands=['f606w', 'f600lp', 'f098m', 
         this_field = {}
         bands = []
         for fname in file_list:
-            if fields[0] in fname:
+            if field in fname:
                 for band in master_bands:
                     if band in fname:
                         bands.append(band)

@@ -17,7 +17,7 @@ def wht_to_rms(wht_fname, rms_fname, zero_handle='inf'):
     RMS map .fits file
 
     """
-    hdu_list = fits.open(wht_fname)
+    hdu_list = fits.open(wht_fname, ignore_missing_end=True)
     weight_data = hdu_list[0].data
 
     # Changes the header of the new fits file to match the filename
@@ -65,7 +65,7 @@ def wht_to_rms_mask(wht_fname, rms_fname, mask):
     RMS map .fits file
 
     """
-    hdu_list = fits.open(wht_fname)
+    hdu_list = fits.open(wht_fname, ignore_missing_end=True)
     weight_data = hdu_list[0].data
 
     # Changes the header of the new fits file to match the filename
