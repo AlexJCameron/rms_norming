@@ -43,15 +43,15 @@ def false_sources(field_band_dict, no_sources=100):
     ############################
     ##### Load in the data #####
     ############################
-    hdu_list_wht = fits.open(field_band_dict['wht'])
+    hdu_list_wht = fits.open(field_band_dict['wht'], ignore_missing_end=True)
     wht_data = hdu_list_wht[0].data
     hdu_list_wht.close()
 
-    hdu_list = fits.open(field_band_dict['sci'])
+    hdu_list = fits.open(field_band_dict['sci'], ignore_missing_end=True)
     sci_data = hdu_list[0].data
     hdu_list.close()
 
-    hdu_list_seg = fits.open(field_band_dict['segmap'])
+    hdu_list_seg = fits.open(field_band_dict['segmap'], ignore_missing_end=True)
     seg_data = hdu_list_seg[0].data
     hdu_list_seg.close()
     ############################

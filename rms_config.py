@@ -75,8 +75,9 @@ def auto_config(config_file='detection.config'):
     bands = config_dict['master_bands'].split(',')
     config_dict['master_bands'] = bands
 
-    bands = config_dict['make_bands'].split(',')
-    config_dict['make_bands'] = bands
+    if 'make_bands' in config_dict:
+        bands = config_dict['make_bands'].split(',')
+        config_dict['make_bands'] = bands
 
     return config_dict
 
