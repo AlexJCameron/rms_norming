@@ -3,22 +3,24 @@ from astropy.io import fits
 from os.path import exists
 
 # #### BORG z8 #### #
-magzeros = {
-'f606w':26.090,
-'f600lp':25.879,
-'f098m':25.6674,
-'f125w':26.2303,
-'f160w':25.9463
-}
+# print "Config: Using BoRG z8 zeropoints"
+# magzeros = {
+# 'f606w':26.090,
+# 'f600lp':25.879,
+# 'f098m':25.6674,
+# 'f125w':26.2303,
+# 'f160w':25.9463
+# }
 
 # #### BORG z9 #### #
-# magzeros = {
-# 'F105':26.2687,
-# 'F125':26.2303,
-# 'F140':26.4524,
-# 'F160':25.9463,
-# 'F350':26.957
-# }
+print "Config: Using BoRG z9 zeropoints"
+magzeros = {
+'F105':26.2687,
+'F125':26.2303,
+'F140':26.4524,
+'F160':25.9463,
+'F350':26.957
+}
 
 def read_list(list_fname):
     """Takes a flat file list where each item is on a separate line and returns in list format.

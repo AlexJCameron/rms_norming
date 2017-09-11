@@ -6,11 +6,20 @@ from os.path import isfile
 from os import remove
 
 if __name__=='__main__':
-    sci_data_dir = config.config_dict['sci_dir']
+    # sci_data_dir = config.config_dict['sci_dir']    #z8
     master_bands = config.config_dict['master_bands']
     fields = config.read_list(config.config_dict['fields'])
-    field_data = config.field_band_list(fields, sci_data_dir, master_bands=master_bands)
-    field_data = config.full_filename_list_z8(field_data)
+
+    # field_data = config.field_band_list(fields, sci_data_dir, master_bands=master_bands) #z8
+    field_data = {}             # z9
+    for field in fields:        # z9
+        this_field = {}
+        this_field['bands'] = master_bands  # z9
+        field_data[field] = this_field      # z9
+
+
+    # field_data = config.full_filename_list_z8(field_data) #z8
+    field_data = config.full_filename_list_z9(field_data) #z9
     make_bands = config.config_dict['make_bands']
 
     flagged_imgs = []
@@ -23,7 +32,7 @@ if __name__=='__main__':
             wht_list.append(field_data[field][band]['wht'])
 
         if not isfile(outmask):
-            print "Making bad pixel mask..."
+            print "\n\nMaking bad pixel mask for field %s..." % field
             mask = rms.bad_pixel_mask(wht_list, outmask)
         else:
             print "Bad pixel mask for field %s already exists!" % field
@@ -34,7 +43,7 @@ if __name__=='__main__':
         for band in make_bands:
             flags = ''
             try:
-                print "\n\n****************\n****************\nField %s, band %s : \n" % (field, band)
+                print "****************\n****************\nField %s, band %s : \n" % (field, band)
                 if not isfile(field_data[field][band]['rms_crude']):
                     print "Making initial RMS map..."
                     rms.wht_to_rms_mask(field_data[field][band]['wht'], field_data[field][band]['rms_crude'], mask)
